@@ -7,7 +7,7 @@ class MainWidget extends StatelessWidget {
     text: "Добро пожаловать в Феникс",
     style: TextStyle(
       fontSize: 36,
-      fontFamily: 'Semi Bold',
+      fontFamily: 'inter',
       color: Color(0xFF484C52),
       fontWeight: FontWeight(600),
     ),
@@ -42,6 +42,7 @@ class MainWidget extends StatelessWidget {
       borderRadius: BorderRadius.circular(20),
     ),
     child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Center(
           child: Image.asset(
@@ -111,10 +112,89 @@ class MainWidget extends StatelessWidget {
     ),
   );
 
+  late final event = Container(
+    width: 351,
+    height: 113,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(20),
+      color: Colors.white,
+    ),
+    child: Center(
+      child: SizedBox(
+        width: 320,
+        child: Row(
+          spacing: 20,
+          children: [
+            SizedBox(
+              width: 90,
+              height: 90,
+              child: Center(
+                child: Image.asset('assets/images/main_widget/pafnuti.png'),
+              ),
+            ),
+            Expanded(
+              child: SizedBox(
+                width: 195,
+                height: 90,
+                child: Column(
+                  spacing: 10,
+                  children: [
+                    SizedBox(
+                      width: 205,
+                      child: Text(
+                        "Встреча фан клуба Пафнутия Львовича Чубышева",
+                        style: TextStyle(color: Color(0xBF484C52)),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 205,
+                      child: Text(
+                        "12:00" + "    " + "12.02.2027",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(color: Color(0xFF484C52)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  late final eventBlock = Container(
+    width: 381,
+    height: 380,
+    margin: EdgeInsetsGeometry.only(top: 40),
+    padding: EdgeInsetsGeometry.only(top: 15),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(20),
+      color: Color(0xFFD9D9D9),
+    ),
+    child: Column(
+      spacing: 5,
+      children: [
+        SizedBox(
+          width: 300,
+          child: Text(
+            "Вы записаны",
+            textAlign: TextAlign.left,
+            style: TextStyle(fontSize: 20, color: Color(0xBF484C52)),
+          ),
+        ),
+        event,
+      ],
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(body: Column(children: [welcomeBlock, qrBlock])),
+      home: Scaffold(
+        body: Column(children: [welcomeBlock, qrBlock, eventBlock]),
+      ),
     );
   }
 }
