@@ -57,6 +57,9 @@ flutter:
     - assets/images/main_widget/ID.png
     - assets/images/main_widget/loupe.png
     - assets/images/main_widget/pafnuti.png
+    - assets/images/main_widget/user.png
+    - assets/images/main_widget/calendar.png
+    - assets/images/main_widget/main_button.png
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

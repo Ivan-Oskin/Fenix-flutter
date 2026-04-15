@@ -1,9 +1,7 @@
 import 'package:fenix/view/event.dart';
 import 'package:flutter/material.dart';
 
-class MainWidget extends StatelessWidget {
-  MainWidget({super.key});
-
+class MainPage {
   late final eventWidget = EventWidget();
 
   late final Container event = eventWidget.getEvent(
@@ -148,12 +146,10 @@ class MainWidget extends StatelessWidget {
     ),
   );
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: Column(children: [welcomeBlock, qrBlock, eventBlock]),
-      ),
+  Column getMainPage() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [welcomeBlock, qrBlock, eventBlock],
     );
   }
 }
