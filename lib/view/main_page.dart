@@ -5,7 +5,7 @@ class MainPage {
   late final eventWidget = EventWidget();
 
   late final Container event = eventWidget.getEvent(
-    'assets/images/main_widget/pafnuti.png',
+    'assets/images/main_page/pafnuti.png',
     "Встреча фан клуба Пафнутия Львовича Чубышева",
     "12:00",
     "12.07.2027",
@@ -25,7 +25,7 @@ class MainPage {
     alignment: PlaceholderAlignment.middle,
     child: Padding(
       padding: EdgeInsets.only(left: 5),
-      child: Image.asset('assets/images/main_widget/logo_sticker.png'),
+      child: Image.asset('assets/images/main_page/logo_sticker.png'),
     ),
   );
 
@@ -54,7 +54,7 @@ class MainPage {
       children: [
         Center(
           child: Image.asset(
-            'assets/images/main_widget/qr_code.png',
+            'assets/images/main_page/qr_code.png',
             width: 90,
             height: 90,
           ),
@@ -76,7 +76,7 @@ class MainPage {
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: Color(0xFFD9D9D9), width: 2),
           ),
-          child: Image.asset('assets/images/main_widget/ID.png'),
+          child: Image.asset('assets/images/main_page/ID.png'),
         ),
         Text("Войти по ID", style: TextStyle(color: Color(0xBF484C52))),
       ],
@@ -95,7 +95,7 @@ class MainPage {
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: Color(0xFFD9D9D9), width: 2),
           ),
-          child: Image.asset('assets/images/main_widget/loupe.png'),
+          child: Image.asset('assets/images/main_page/loupe.png'),
         ),
         Text("Найти встречу", style: TextStyle(color: Color(0xBF484C52))),
       ],
