@@ -2,6 +2,16 @@ import 'package:fenix/view/event.dart';
 import 'package:flutter/material.dart';
 
 class MainPage {
+  final VoidCallback? onFindMeetingPressed;
+  final VoidCallback? onEnterByIdPressed;
+  final VoidCallback? onScanQrPressed;
+
+  MainPage({
+    this.onFindMeetingPressed,
+    this.onEnterByIdPressed,
+    this.onScanQrPressed,
+  });
+
   late final eventWidget = EventWidget();
 
   late final Container event = eventWidget.getEvent(
@@ -9,6 +19,7 @@ class MainPage {
     "Встреча фан клуба Пафнутия Львовича Чубышева",
     "12:00",
     "12.07.2027",
+    false
   );
 
   final TextSpan welcomeText = TextSpan(
@@ -42,63 +53,72 @@ class MainPage {
     ),
   );
 
-  late final scanner = Container(
-    width: 125,
-    height: 125,
-    decoration: BoxDecoration(
-      color: Color(0xFFD9D9D9),
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Center(
-          child: Image.asset(
-            'assets/images/main_page/qr_code.png',
-            width: 90,
-            height: 90,
+  late final scanner = GestureDetector(
+    onTap: onScanQrPressed ?? () {},
+    child: Container(
+      width: 125,
+      height: 125,
+      decoration: BoxDecoration(
+        color: Color(0xFFD9D9D9),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Center(
+            child: Image.asset(
+              'assets/images/main_page/qr_code.png',
+              width: 90,
+              height: 90,
+            ),
           ),
-        ),
-        Text("Сканировать QR", style: TextStyle(color: Color(0xBF484C52))),
-      ],
-    ),
-  );
-
-  late final buttonIdBox = SizedBox(
-    width: 105,
-    height: 90,
-    child: Column(
-      children: [
-        Container(
-          width: 82,
-          height: 70,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Color(0xFFD9D9D9), width: 2),
-          ),
-          child: Image.asset('assets/images/main_page/ID.png'),
-        ),
-        Text("Войти по ID", style: TextStyle(color: Color(0xBF484C52))),
-      ],
+          Text("Сканировать QR", style: TextStyle(color: Color(0xBF484C52))),
+        ],
+      ),
     ),
   );
 
-  late final buttonFindBox = SizedBox(
-    width: 100,
-    height: 90,
-    child: Column(
-      children: [
-        Container(
-          width: 82,
-          height: 70,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Color(0xFFD9D9D9), width: 2),
+  late final buttonIdBox = GestureDetector(
+    onTap: onEnterByIdPressed ?? () {},
+    child: SizedBox(
+      width: 105,
+      height: 90,
+      child: Column(
+        children: [
+          Container(
+            width: 82,
+            height: 70,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Color(0xFFD9D9D9), width: 2),
+            ),
+            child: Image.asset('assets/images/main_page/ID.png'),
           ),
-          child: Image.asset('assets/images/main_page/loupe.png'),
-        ),
-        Text("Найти встречу", style: TextStyle(color: Color(0xBF484C52))),
-      ],
+          Text("Войти по ID", style: TextStyle(color: Color(0xBF484C52))),
+        ],
+      ),
+    ),
+  );
+
+  late final buttonFindBox = GestureDetector(
+    onTap: onFindMeetingPressed ?? () {},
+    child: SizedBox(
+      width: 100,
+      height: 90,
+      child: Column(
+        children: [
+          Container(
+            width: 82,
+            height: 70,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Color(0xFFD9D9D9), width: 2),
+            ),
+            child: Image.asset('assets/images/main_page/loupe.png'),
+          ),
+          Text("Найти встречу", style: TextStyle(color: Color(0xBF484C52))),
+        ],
+      ),
     ),
   );
 
@@ -141,12 +161,26 @@ class MainPage {
             style: TextStyle(fontSize: 20, color: Color(0xBF484C52)),
           ),
         ),
-        event,
+        SizedBox(
+          height: 300,
+          child: SingleChildScrollView(
+            child: Column(
+              spacing: 20,
+              children: [
+                event,
+                event,
+                event,
+                event,
+                event,
+              ],
+            ),
+          ),
+        )
       ],
     ),
   );
 
-  Column getMainPage() {
+  Column getPage() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [welcomeBlock, qrBlock, eventBlock],

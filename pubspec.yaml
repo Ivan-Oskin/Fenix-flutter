@@ -30,6 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  mobile_scanner: ^5.2.3   # актуальная версия на 2026 год
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -58,6 +59,7 @@ flutter:
     - assets/images/main_page/loupe.png
     - assets/images/main_page/pafnuti.png
     - assets/images/bottom/user.png
+    - assets/images/bottom/user_active.png
     - assets/images/bottom/calendar.png
     - assets/images/bottom/main_button.png
     - assets/images/bottom/calendar_active.png
@@ -97,3 +99,5 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+

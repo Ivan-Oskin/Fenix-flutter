@@ -6,13 +6,20 @@ class EventWidget {
     String information,
     String time,
     String date,
+    bool borderShow,
   ) {
+    Border border = Border.all(color: Colors.white);
+    if (borderShow) {
+      border = Border.all(color: Color(0xFFD9D9D9));
+    }
+
     return Container(
       width: 351,
       height: 113,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: Colors.white,
+        color: Color(0xFFFFFFFF),
+        border: border,
       ),
       child: Center(
         child: SizedBox(
