@@ -1,25 +1,31 @@
-import 'package:fenix/view/event.dart';
+import 'package:fenix/model/event.dart';
+import 'package:fenix/view/event_view.dart';
 import 'package:flutter/material.dart';
 
 class MainPage {
   final VoidCallback? onFindMeetingPressed;
   final VoidCallback? onEnterByIdPressed;
   final VoidCallback? onScanQrPressed;
+  final VoidCallback? onEventPressed;
 
   MainPage({
     this.onFindMeetingPressed,
     this.onEnterByIdPressed,
     this.onScanQrPressed,
+    this.onEventPressed,
   });
 
   late final eventWidget = EventWidget();
 
   late final Container event = eventWidget.getEvent(
     'assets/images/main_page/pafnuti.png',
-    "Встреча фан клуба Пафнутия Львовича Чубышева",
-    "12:00",
-    "12.07.2027",
-    false
+    Event(title: "пафнутий", startDate: "12.12.2026 12:00"),
+    false,
+  );
+
+  late final GestureDetector eventButton = GestureDetector(
+    onTap: onEventPressed ?? () {},
+    child: event,
   );
 
   final TextSpan welcomeText = TextSpan(
@@ -167,15 +173,15 @@ class MainPage {
             child: Column(
               spacing: 20,
               children: [
-                event,
-                event,
-                event,
-                event,
-                event,
+                eventButton,
+                eventButton,
+                eventButton,
+                eventButton,
+                eventButton,
               ],
             ),
           ),
-        )
+        ),
       ],
     ),
   );

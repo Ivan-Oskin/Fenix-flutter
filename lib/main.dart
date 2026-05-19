@@ -1,21 +1,32 @@
+import 'package:fenix/repository/profile_repository.dart';
+import 'package:fenix/view/auth_screen.dart';
 import 'package:fenix/view/find_by_id.dart';
 import 'package:fenix/view/main_page.dart';
 import 'package:fenix/view/qr_scanner.dart';
 import 'package:fenix/view/schedule_page.dart';
 import 'package:fenix/view/profile_page.dart';
+import 'package:fenix/view/information_page.dart';
+import 'package:fenix/view/presentation_page.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Проверяем есть ли профиль;
+  final hasProfile = await ProfileRepository().isProfileEmpty(); // твой метод проверки
+
+  runApp(MyApp(startWithAuth: !hasProfile));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool startWithAuth;
+
+  const MyApp({super.key, required this.startWithAuth});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MainWidget(), // Теперь MaterialApp оборачивает MainWidget
+      home: startWithAuth ? AuthScreen() : MainWidget(),
     );
   }
 }
@@ -36,26 +47,27 @@ class MainWidgetState extends State<MainWidget> {
     super.initState();
 
     pages = [
-      SchedulePage().getPage(),
+      SchedulePage(),
       MainPage(
-        onFindMeetingPressed: () => setState(() => selectedPage = 0),
-        onEnterByIdPressed: () => setState(() => selectedPage = 3),
         onScanQrPressed: () {
           Future.microtask(() {
             if (mounted) {
               Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const QrScannerPage(),
-                ),
+                MaterialPageRoute(builder: (context) => const QrScannerPage()),
               );
             }
           });
         },
+        onFindMeetingPressed: () => setState(() => selectedPage = 0),
+        onEnterByIdPressed: () => setState(() => selectedPage = 3),
+        onEventPressed: () => setState(() => selectedPage = 4),
       ).getPage(),
       ProfilePage().getPage(),
       FindByIdPage(
         onBackToMenu: () => setState(() => selectedPage = 1),
       ).getPage(),
+      PresentationPage(),
+      QrScannerPage(),
     ];
   }
 
