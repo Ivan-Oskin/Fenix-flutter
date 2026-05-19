@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 class Event {
   final String? id;
   final String title;
@@ -5,6 +7,7 @@ class Event {
   final String? location;
   final String startDate;
   final int? speakerId;
+  Uint8List? photoBytes;
 
   Event({
     this.id,
@@ -13,6 +16,7 @@ class Event {
     this.location,
     required this.startDate,
     this.speakerId,
+    this.photoBytes
   });
 
   factory Event.fromMap(Map<String, dynamic> map) {

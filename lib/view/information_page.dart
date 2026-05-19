@@ -19,7 +19,7 @@ class InformationPage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () => Navigator.pop(context), // ← Кнопка назад
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SingleChildScrollView(
@@ -48,7 +48,7 @@ class InformationPage extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    event.startDate,
+                    event.startDate ?? '',
                     style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 12),
@@ -77,11 +77,13 @@ class InformationPage extends StatelessWidget {
 
             const SizedBox(height: 40),
 
-            // Изображение
-            Image.asset(
-              "assets/images/main_page/pafnuti.png",
-              width: 285,
-              fit: BoxFit.contain,
+            // === Изображение с сервера ===
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: _buildEventImage(),
+              ),
             ),
 
             const SizedBox(height: 30),
@@ -91,7 +93,11 @@ class InformationPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 30),
               child: Text(
                 event.description ?? "Описание мероприятия отсутствует.",
-                style: const TextStyle(fontSize: 16, color: Color(0xFF484C52), height: 1.5),
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF484C52),
+                  height: 1.5,
+                ),
               ),
             ),
 
@@ -100,6 +106,31 @@ class InformationPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // Новый метод для отображения фото
+  Widget _buildEventImage() {
+    if (event.photoBytes != null && event.photoBytes!.isNotEmpty) {
+      return Image.memory(
+        event.photoBytes!,
+        width: 285,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            "assets/images/main_page/pafnuti.png",
+            width: 285,
+            fit: BoxFit.contain,
+          );
+        },
+      );
+    } else {
+      // Если фото нет — показываем запасное
+      return Image.asset(
+        "assets/images/main_page/pafnuti.png",
+        width: 285,
+        fit: BoxFit.contain,
+      );
+    }
   }
 
   Widget _buildActionButton(String text, Color color, VoidCallback onTap) {

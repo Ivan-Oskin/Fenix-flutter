@@ -18,7 +18,6 @@ class MainPage {
   late final eventWidget = EventWidget();
 
   late final Container event = eventWidget.getEvent(
-    'assets/images/main_page/pafnuti.png',
     Event(title: "пафнутий", startDate: "12.12.2026 12:00"),
     false,
   );

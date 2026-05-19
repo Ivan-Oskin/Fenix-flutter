@@ -17,31 +17,40 @@ class DataBaseInit {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
-    return await openDatabase(
-      path,
-      version: 1,
-      onCreate: _createDB,
-    );
+    return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 
   Future<void> _createDB(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE profile (
-        id INTEGER PRIMARY KEY,
-        username TEXT,
-        token TEXT,
-        name TEXT,
-        surname TEXT,
-        patronymic TEXT,
-      );
-      CREATE TABLE event (
-        id INTEGER PRIMARY KEY,
-        title TEXT,
-        description TEXT,
-        location TEXT,
-        start_date TEXT
-        speaker_id INTEGER
-      );
-    ''');
+    CREATE TABLE IF NOT EXISTS profile (
+      id INTEGER PRIMARY KEY,
+      username TEXT,
+      token TEXT,
+      name TEXT,
+      surname TEXT,
+      patronymic TEXT
+    );
+  ''');
+
+    // Таблица event — отдельно!
+    await db.execute('''
+    CREATE TABLE IF NOT EXISTS event (
+      id TEXT PRIMARY KEY,
+      title TEXT,
+      description TEXT,
+      location TEXT,
+      start_date TEXT,
+      speaker_id INTEGER,
+    );
+  ''');
+
+    await db.execute('''
+    CREATE TABLE IF NOT EXISTS polls (
+      id INTEGER PRIMARY KEY,
+      title TEXT,
+      url TEXT,
+      meeting_id TEXT
+    );
+  ''');
   }
 }
