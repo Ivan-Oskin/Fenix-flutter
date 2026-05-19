@@ -26,6 +26,13 @@ class EventRepository {
     );
   }
 
+  Future<List<Event>> findAll() async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> map = await db.query("event", orderBy: "start_date DESC");
+
+    return map.map((map) => Event.fromMap(map)).toList();
+  }
+
   Future<bool> isEventExists(String eventId) async {
     final db = await _dbHelper.database;
 

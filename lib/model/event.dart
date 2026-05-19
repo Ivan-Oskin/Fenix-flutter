@@ -27,6 +27,7 @@ class Event {
       location: map['location'],
       startDate: map['start_date'],
       speakerId: map['speaker_id'],
+      photoBytes: map['photo'] as Uint8List?,
     );
   }
 

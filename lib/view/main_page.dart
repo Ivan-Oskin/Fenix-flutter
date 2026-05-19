@@ -1,4 +1,5 @@
 import 'package:fenix/model/event.dart';
+import 'package:fenix/repository/event_repository.dart';
 import 'package:fenix/view/event_view.dart';
 import 'package:flutter/material.dart';
 
@@ -16,6 +17,7 @@ class MainPage {
   });
 
   late final eventWidget = EventWidget();
+  late final eventRepository = EventRepository();
 
   late final Container event = eventWidget.getEvent(
     Event(title: "пафнутий", startDate: "12.12.2026 12:00"),
@@ -149,36 +151,58 @@ class MainPage {
   late final eventBlock = Container(
     width: 381,
     height: 380,
-    margin: EdgeInsetsGeometry.only(top: 40),
-    padding: EdgeInsetsGeometry.only(top: 15),
+    margin: const EdgeInsets.only(top: 40),
+    padding: const EdgeInsets.only(top: 15),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(20),
-      color: Color(0xFFD9D9D9),
+      color: const Color(0xFFD9D9D9),
     ),
     child: Column(
-      spacing: 5,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 340,
+        const Padding(
+          padding: EdgeInsets.only(left: 20),
           child: Text(
             "Вы записаны",
-            textAlign: TextAlign.left,
             style: TextStyle(fontSize: 20, color: Color(0xBF484C52)),
           ),
         ),
-        SizedBox(
-          height: 300,
-          child: SingleChildScrollView(
-            child: Column(
-              spacing: 20,
-              children: [
-                eventButton,
-                eventButton,
-                eventButton,
-                eventButton,
-                eventButton,
-              ],
-            ),
+        const SizedBox(height: 10),
+        Expanded(
+          child: FutureBuilder<List<Event>>(
+            future: eventRepository.findAll(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (snapshot.hasError) {
+                return const Center(child: Text("Ошибка загрузки событий"));
+              }
+
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Center(
+                  child: Text(
+                    "Пока нет записей",
+                    style: TextStyle(color: Color(0xBF484C52), fontSize: 16),
+                  ),
+                );
+              }
+
+              final events = snapshot.data!;
+
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: events
+                      .map((event) => Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: buildEventCard(event),
+                  ))
+                      .toList(),
+                ),
+              );
+            },
           ),
         ),
       ],
@@ -191,4 +215,16 @@ class MainPage {
       children: [welcomeBlock, qrBlock, eventBlock],
     );
   }
+
+  // Виджет одного события
+  Widget buildEventCard(Event event) {
+    return GestureDetector(
+      onTap: onEventPressed ?? () {},
+      child: eventWidget.getEvent(
+        event,
+        false,
+      ),
+    );
+  }
 }
+
