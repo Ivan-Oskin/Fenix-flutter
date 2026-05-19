@@ -8,56 +8,33 @@ class EventRepository {
   // ==================== CRUD ====================
 
   /// Сохранить событие (вставка или обновление)
-  Future<int> saveEvent(Event event) async {
+  Future<void> saveEvent(Event event) async {
     final db = await _dbHelper.database;
 
-    return await db.insert(
+    await db.insert(
       'event',
-      event.toMap(),
+      {
+        'id': event.id,
+        'title': event.title,
+        'description': event.description,
+        'location': event.location,
+        'start_date': event.startDate,
+        'speaker_id': event.speakerId,
+        'photo' : event.photoBytes
+      },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
-  /// Получить ВСЕ события
-  Future<List<Event>> getAllEvents() async {
+  Future<bool> isEventExists(String eventId) async {
     final db = await _dbHelper.database;
-    final result = await db.query('event');
 
-    return result.map((map) => Event.fromMap(map)).toList();
-  }
-
-  /// Получить событие по ID (полная информация)
-  Future<Event?> getEventById(int id) async {
-    final db = await _dbHelper.database;
-    final result = await db.query(
+    final List<Map<String, dynamic>> result = await db.query(
       'event',
       where: 'id = ?',
-      whereArgs: [id],
+      whereArgs: [eventId],
+      limit: 1,
     );
-
-    if (result.isNotEmpty) {
-      return Event.fromMap(result.first);
-    }
-    return null;
-  }
-
-  /// Получить только title, location, start_date по ID
-  Future<Map<String, dynamic>?> getEventBasicInfo(int id) async {
-    final db = await _dbHelper.database;
-
-    final result = await db.query(
-      'event',
-      columns: ['title', 'location', 'start_date'],
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-
-    return result.isNotEmpty ? result.first : null;
-  }
-
-  /// Удалить событие
-  Future<int> deleteEvent(int id) async {
-    final db = await _dbHelper.database;
-    return await db.delete('event', where: 'id = ?', whereArgs: [id]);
+    return result.isNotEmpty;
   }
 }

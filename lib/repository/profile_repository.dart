@@ -15,28 +15,20 @@ class ProfileRepository {
     }
   }
 
-  Future<int> insertProfile(Profile profile) async {
-    final db = await dataBaseInit.database;
-    return await db.insert("profile", profile.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
-  }
-
-  Future<Profile?> getProfile() async {
-    final db = await dataBaseInit.database;
-    final result = await db.query("profile", limit: 1);
-
-    if(result.isNotEmpty) {
-      return Profile.fromMap(result.first);
-    }
-    return null;
-  }
-
-  Future<int> updateProfile(Profile profile) async {
-    final db = await dataBaseInit.database;
-    return await db.update(
+  Future<void> saveProfile(Profile profile) async {
+    final db = await DataBaseInit.instance.database;
+    await db.insert(
       'profile',
-      profile.toMap(),
-      where: 'id = ?',
-      whereArgs: [profile.id],
+      {
+        'id': profile.id,
+        'username': profile.username,
+        'token': profile.token,
+        'name': profile.name,
+        'surname': profile.surname,
+        'patronymic': profile.patronymic,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
+
 }

@@ -5,7 +5,6 @@ import 'package:fenix/view/main_page.dart';
 import 'package:fenix/view/qr_scanner.dart';
 import 'package:fenix/view/schedule_page.dart';
 import 'package:fenix/view/profile_page.dart';
-import 'package:fenix/view/information_page.dart';
 import 'package:fenix/view/presentation_page.dart';
 import 'package:flutter/material.dart';
 

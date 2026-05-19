@@ -21,6 +21,7 @@ class DataBaseInit {
   }
 
   Future<void> _createDB(Database db, int version) async {
+    // Таблица Profile
     await db.execute('''
     CREATE TABLE IF NOT EXISTS profile (
       id INTEGER PRIMARY KEY,
@@ -32,24 +33,26 @@ class DataBaseInit {
     );
   ''');
 
-    // Таблица event — отдельно!
+    // Таблица Event
     await db.execute('''
     CREATE TABLE IF NOT EXISTS event (
       id TEXT PRIMARY KEY,
-      title TEXT,
+      title TEXT NOT NULL,
       description TEXT,
       location TEXT,
       start_date TEXT,
       speaker_id INTEGER,
+      photo BLOB
     );
   ''');
 
+    // Таблица Polls
     await db.execute('''
     CREATE TABLE IF NOT EXISTS polls (
-      id INTEGER PRIMARY KEY,
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      meeting_id TEXT,
       title TEXT,
-      url TEXT,
-      meeting_id TEXT
+      url TEXT
     );
   ''');
   }
