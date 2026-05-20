@@ -1,7 +1,8 @@
-import 'package:fenix/view/event_view.dart';
 import 'package:flutter/material.dart';
 import 'package:fenix/model/event.dart';
+import 'package:fenix/view/event_view.dart';
 import 'package:fenix/view/information_page.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -10,13 +11,14 @@ class SchedulePage extends StatelessWidget {
 
   Future<List<Event>> fetchEvents() async {
     try {
-      print("📡 Загружаем список мероприятий...");
+      final storage = const FlutterSecureStorage();
+      final String? token = await storage.read(key: 'jwt_token');
 
       final response = await http.get(
         Uri.parse('http://llvvv.ru:8080/api/meetings'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzkyODUyOTcsInR5cGUiOiJzcGVha2VyIiwidXNlcl9pZCI6MiwidXNlcm5hbWUiOiJJdmFuIn0.4OV6vvNvY4GzCA8ojB4Dvs9Hv8sQsavsSq8GGKHroSk',
+          if (token != null) 'Authorization': 'Bearer $token',
         },
       );
 
@@ -33,28 +35,24 @@ class SchedulePage extends StatelessWidget {
         Event event = Event.fromMap(json);
         print("✅ Мероприятие ID=${event.id}, Title=${event.title}");
 
-        // === Загрузка фото ===
+        // Загрузка фото
         try {
           final photoUrl = 'http://llvvv.ru:8080/api/meetings/${event.id}/photo/';
-          print("📸 Загружаем фото: $photoUrl");
 
           final photoResponse = await http.get(
             Uri.parse(photoUrl),
             headers: {
-              'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzkyODUyOTcsInR5cGUiOiJzcGVha2VyIiwidXNlcl9pZCI6MiwidXNlcm5hbWUiOiJJdmFuIn0.4OV6vvNvY4GzCA8ojB4Dvs9Hv8sQsavsSq8GGKHroSk',
+              'Authorization': 'Bearer $token',   // используем уже полученный token
             },
           );
 
-          print("📸 Фото ID=${event.id} → Статус: ${photoResponse.statusCode} | Размер: ${photoResponse.bodyBytes.length} байт");
+          print("📸 Фото ID=${event.id} → ${photoResponse.statusCode} | ${photoResponse.bodyBytes.length} байт");
 
           if (photoResponse.statusCode == 200 && photoResponse.bodyBytes.isNotEmpty) {
             event.photoBytes = photoResponse.bodyBytes;
-            print("✅ Фото успешно загружено для ID=${event.id}");
-          } else {
-            print("❌ Фото не загружено (пустое или ошибка)");
           }
         } catch (e) {
-          print("❌ Ошибка при загрузке фото для ID=${event.id}: $e");
+          print("❌ Ошибка фото ID=${event.id}: $e");
         }
 
         events.add(event);
@@ -62,8 +60,8 @@ class SchedulePage extends StatelessWidget {
 
       return events;
     } catch (e) {
-      print("🔥 Общая ошибка: $e");
-      throw Exception('Не удалось загрузить данные: $e');
+      print("🔥 Общая ошибка при загрузке мероприятий: $e");
+      rethrow;
     }
   }
 
@@ -71,7 +69,6 @@ class SchedulePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Welcome блок
         SafeArea(
           child: Padding(
             padding: const EdgeInsets.only(top: 10),
@@ -94,7 +91,6 @@ class SchedulePage extends StatelessWidget {
           ),
         ),
 
-        // Поиск (оставил как было)
         SizedBox(
           width: 351,
           height: 85,
@@ -118,17 +114,12 @@ class SchedulePage extends StatelessWidget {
               ),
               IconButton(
                 onPressed: () {},
-                icon: Image.asset(
-                  "assets/images/main_page/loupe.png",
-                  width: 41,
-                  height: 41,
-                ),
+                icon: Image.asset("assets/images/main_page/loupe.png", width: 41, height: 41),
               ),
             ],
           ),
         ),
 
-        // Список мероприятий
         Expanded(
           child: SizedBox(
             width: 381,
@@ -153,10 +144,7 @@ class SchedulePage extends StatelessWidget {
                     spacing: 5,
                     children: events.map((event) {
                       final eventWidget = EventWidget();
-                      final container = eventWidget.getEvent(
-                        event,
-                        false,
-                      );
+                      final container = eventWidget.getEvent(event, false);
 
                       return GestureDetector(
                         onTap: () {

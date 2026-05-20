@@ -1,6 +1,5 @@
 import 'package:fenix/model/event.dart';
 import 'package:flutter/material.dart';
-import 'dart:typed_data';
 
 class EventWidget {
   Container getEvent(
@@ -22,7 +21,7 @@ class EventWidget {
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
           return Image.asset(
-            "assets/images/main_page/pafnuti.png",
+            "assets/images/reg/logo.png",
             fit: BoxFit.cover,
           );
         },
@@ -30,7 +29,7 @@ class EventWidget {
     } else {
       // Запасной вариант — картинка из ассетов
       imageWidget = Image.asset(
-        "assets/images/main_page/pafnuti.png",
+        "assets/images/reg/logo.png",
         fit: BoxFit.cover,
       );
     }
@@ -76,7 +75,7 @@ class EventWidget {
                       SizedBox(
                         width: 205,
                         child: Text(
-                          event.startDate ?? '',
+                          event.startDate,
                           textAlign: TextAlign.left,
                           style: const TextStyle(color: Color(0xFF484C52)),
                         ),

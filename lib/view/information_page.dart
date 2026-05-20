@@ -2,9 +2,12 @@ import 'package:fenix/model/event.dart';
 import 'package:fenix/model/polls.dart';
 import 'package:fenix/repository/event_repository.dart';
 import 'package:fenix/repository/poll_repository.dart';
+import 'package:fenix/view/presentation_page.dart'; // ← Добавь импорт
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:typed_data';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class InformationPage extends StatefulWidget {
   final Event event;
@@ -28,10 +31,9 @@ class _InformationPageState extends State<InformationPage> {
   void initState() {
     super.initState();
     _event = widget.event;
-    _checkIfRegisteredInDB();   // Проверяем только регистрацию
+    _checkIfRegisteredInDB();
   }
 
-  // Проверяем, записан ли уже пользователь
   Future<void> _checkIfRegisteredInDB() async {
     final eventRepository = EventRepository();
     final exists = await eventRepository.isEventExists(_event.id ?? '');
@@ -42,41 +44,52 @@ class _InformationPageState extends State<InformationPage> {
     });
   }
 
-  // Загружаем polls + сохраняем Event и Polls
   Future<void> _registerAndSave() async {
+    final storage = const FlutterSecureStorage();
+    final String? token = await storage.read(key: 'jwt_token');
     setState(() => _isLoading = true);
 
     try {
-      // 1. Загружаем полные данные (с polls)
       final response = await http.get(
         Uri.parse('http://llvvv.ru:8080/api/meetings/${widget.event.id}'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzkyODUyOTcsInR5cGUiOiJzcGVha2VyIiwidXNlcl9pZCI6MiwidXNlcm5hbWUiOiJJdmFuIn0.4OV6vvNvY4GzCA8ojB4Dvs9Hv8sQsavsSq8GGKHroSk',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final responsePresentation = await http.get(
+        Uri.parse('http://llvvv.ru:8080/api/meetings/${widget.event.id}/presentation'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
         },
       );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
 
-        setState(() {
+        if (data['polls'] != null) {
+          _polls = (data['polls'] as List)
+              .map((item) => Poll.fromMap(item as Map<String, dynamic>))
+              .toList();
+        }
 
-          if (data['polls'] != null) {
-            _polls = (data['polls'] as List)
-                .map((item) => Poll.fromMap(item as Map<String, dynamic>))
-                .toList();
-          }
-        });
-
-        // 2. Сохраняем в БД
-        final eventRepository = EventRepository();
         final pollRepository = PollRepository();
-
-        await eventRepository.saveEvent(_event);
 
         for (var poll in _polls) {
           await pollRepository.save(poll);
         }
+
+        if(responsePresentation.statusCode == 200) {
+          print("сохраянем презентацию");
+          final Uint8List presentationBytes = responsePresentation.bodyBytes;
+          _event.presentationBytes = presentationBytes;
+        }
+
+        final eventRepository = EventRepository();
+
+        await eventRepository.saveEvent(_event);
 
         setState(() {
           _isRegistered = true;
@@ -84,7 +97,6 @@ class _InformationPageState extends State<InformationPage> {
       }
     } catch (e) {
       print('Ошибка при записи: $e');
-      // Можно показать SnackBar с ошибкой
     } finally {
       setState(() => _isLoading = false);
     }
@@ -92,6 +104,66 @@ class _InformationPageState extends State<InformationPage> {
 
   void _onRegisterPressed() async {
     await _registerAndSave();
+  }
+
+  // ←←← НОВЫЙ МЕТОД ←←←
+  void _onConnectPressed() async {
+    List<Poll> loadedPolls = [];
+    Event? loadedEvent; // Делаем nullable
+    final String eventId = _event.id ?? '';
+
+    print('🔍 _onConnectPressed вызван');
+    print('📌 Event ID: $eventId');
+
+    if (eventId.isNotEmpty) {
+      try {
+        // Загружаем опросы и событие параллельно
+        final results = await Future.wait([
+          PollRepository().findAllByEventId(eventId),
+          EventRepository().findById(eventId),
+        ]);
+
+        loadedPolls = results[0] as List<Poll>;
+        loadedEvent = results[1] as Event?;
+
+        print('✅ Найдено опросов в БД: ${loadedPolls.length}');
+
+        if (loadedEvent != null) {
+          print('✅ Событие загружено: ${loadedEvent.title}');
+        } else {
+          print('⚠️ Событие не найдено в БД');
+        }
+
+        for (var poll in loadedPolls) {
+          print('   • Poll: ${poll.title} | URL: ${poll.url}');
+        }
+      } catch (e) {
+        print('❌ Ошибка при загрузке данных: $e');
+      }
+    } else {
+      print('❌ Event ID пустой!');
+    }
+
+    if (!mounted) return;
+
+    // Проверяем, что событие загружено
+    if (loadedEvent == null) {
+      // Показываем ошибку пользователю
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Не удалось загрузить данные мероприятия')),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PresentationPage(
+          event: loadedEvent, // Теперь точно не null
+          polls: loadedPolls,
+        ),
+      ),
+    );
   }
 
   @override
@@ -133,7 +205,7 @@ class _InformationPageState extends State<InformationPage> {
               child: Column(
                 children: [
                   Text(
-                    _event.startDate ?? '',
+                    _event.startDate,
                     style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 12),
@@ -161,7 +233,7 @@ class _InformationPageState extends State<InformationPage> {
                   _buildActionButton(
                     "Подключиться",
                     _isRegistered ? Colors.green : Colors.grey,
-                    _isRegistered ? () {} : null,
+                    _isRegistered ? _onConnectPressed : null,   // ← Изменено
                   ),
                 ],
               ),
@@ -203,7 +275,7 @@ class _InformationPageState extends State<InformationPage> {
       return Image.memory(_event.photoBytes!, width: 285, fit: BoxFit.contain);
     }
     return Image.asset(
-      "assets/images/main_page/pafnuti.png",
+      "assets/images/reg/logo.png",
       width: 285,
       fit: BoxFit.contain,
     );

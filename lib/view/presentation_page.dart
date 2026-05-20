@@ -1,8 +1,18 @@
-import 'package:easy_docs_viewer/easy_docs_viewer.dart';
+import 'package:fenix/model/event.dart';
+import 'package:fenix/model/polls.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class PresentationPage extends StatefulWidget {
-  const PresentationPage({super.key});
+  final Event? event;
+  final List<Poll>? polls;
+
+  const PresentationPage({
+    super.key,
+    this.event,
+    this.polls,
+  });
 
   @override
   State<PresentationPage> createState() => _PresentationPageState();
@@ -16,15 +26,87 @@ class _PresentationPageState extends State<PresentationPage> {
     child: SizedBox(
       width: 388,
       height: 238,
-      child: EasyDocsViewer(
-        url:
-            "https://iro-49.ru/wp-content/uploads/2025/05/%D0%9F%D1%80%D0%B5%D0%B7%D0%B5%D0%BD%D1%82%D0%B0%D1%86%D0%B8%D1%8F-%D0%BA-%D0%B7%D0%B0%D0%BD%D1%8F%D1%82%D0%B8%D1%8E-4.pdf?ysclid=mpbf02ytdo604141228",
+      child: widget.event?.presentationBytes != null
+          ? ClipRect(
+        child: SfPdfViewer.memory(
+          widget.event!.presentationBytes!,
+          canShowScrollHead: false,
+          canShowScrollStatus: false,
+          pageSpacing: 0,
+          enableDoubleTapZooming: false,
+        ),
+      )
+          : const Center(
+        child: Text('Презентация не загружена'),
       ),
     ),
   );
 
-  final materials = SingleChildScrollView(
-    child: Column(spacing: 20, children: const [Text("какой то материал")]),
+  Widget get materials => SingleChildScrollView(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(bottom: 16),
+          child: Text(
+            "Материалы",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF484C52),
+            ),
+          ),
+        ),
+        if (widget.polls == null || widget.polls!.isEmpty)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Text("Материалы отсутствуют"),
+            ),
+          )
+        else
+          Column(
+            children: widget.polls!.map((poll) {
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  title: Text(
+                    poll.title ?? "Без названия",
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  subtitle: Text(
+                    poll.url ?? "",
+                    style: const TextStyle(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: const Icon(Icons.open_in_new, color: Colors.blue),
+                  onTap: () async {
+                    final url = poll.url;
+                    if (url != null && url.isNotEmpty) {
+                      final uri = Uri.parse(url);
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      }
+                    }
+                  },
+                ),
+              );
+            }).toList(),
+          ),
+      ],
+    ),
   );
 
   final chat = Column(
@@ -34,7 +116,7 @@ class _PresentationPageState extends State<PresentationPage> {
           reverse: true,
           child: Column(
             spacing: 20,
-            children: const [Text("какие-то там сообщения")],
+            children: const [Text("Здесь будет чат с докладчиком")],
           ),
         ),
       ),
@@ -76,74 +158,79 @@ class _PresentationPageState extends State<PresentationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        presentation,
-
-        // Кнопки
-        SizedBox(
-          width: 300,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onTap: () => setState(() => showChat = true),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: showChat
-                        ? const Color(0xFFC67C4E)
-                        : const Color(0xFFD9D9D9),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Text(
-                    "Вопрос докладчику",
-                    style: TextStyle(fontSize: 16, color: Color(0xFF484C52)),
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () => setState(() => showChat = false),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: !showChat
-                        ? const Color(0xFFC67C4E)
-                        : const Color(0xFFD9D9D9),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Text(
-                    "материалы",
-                    style: TextStyle(fontSize: 16, color: Color(0xFF484C52)),
-                  ),
-                ),
-              ),
-            ],
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.event?.title ?? "Презентация"),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF484C52),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () => Navigator.pop(context),
         ),
+      ),
+      body: SafeArea(                    // ← Добавил
+        child: Column(
+          children: [
+            const SizedBox(height: 16),   // ← Уменьшил с 20
+            presentation,
+            SizedBox(height: 10,),
+            // Кнопки переключения
+            SizedBox(
+              width: 300,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  GestureDetector(
+                    onTap: () => setState(() => showChat = true),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: showChat ? const Color(0xFFC67C4E) : const Color(0xFFD9D9D9),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        "Вопрос докладчику",
+                        style: TextStyle(fontSize: 16, color: Color(0xFF484C52)),
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => setState(() => showChat = false),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: !showChat ? const Color(0xFFC67C4E) : const Color(0xFFD9D9D9),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        "материалы",
+                        style: TextStyle(fontSize: 16, color: Color(0xFF484C52)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),   // ← Добавил небольшой отступ
+            // Основной контент
+            Container(
+              width: 381,
+              height: 380,
+              margin: const EdgeInsets.only(top: 8),  // ← уменьшил margin
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: const Color(0xFFD9D9D9),
+              ),
+              clipBehavior: Clip.hardEdge,
+              child: showChat ? chat : materials,
+            ),
 
-        // Основной блок (меняется)
-        Container(
-          width: 381,
-          height: 380,
-          margin: const EdgeInsets.only(top: 40),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: const Color(0xFFD9D9D9),
-          ),
-          clipBehavior: Clip.hardEdge,
-          child: showChat ? chat : materials,
+            const SizedBox(height: 16),   // ← уменьшил
+          ],
         ),
-      ],
+      ),
     );
   }
 }

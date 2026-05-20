@@ -1,6 +1,6 @@
 import 'package:fenix/model/profile.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:fenix/repository/database_Init.dart';
+import 'package:fenix/repository/database_init.dart';
 
 class ProfileRepository {
   final DataBaseInit dataBaseInit = DataBaseInit.instance;
@@ -15,20 +15,15 @@ class ProfileRepository {
     }
   }
 
-  Future<void> saveProfile(Profile profile) async {
+  Future<void> save(Profile profile) async {
     final db = await DataBaseInit.instance.database;
-    await db.insert(
-      'profile',
-      {
-        'id': profile.id,
-        'username': profile.username,
-        'token': profile.token,
-        'name': profile.name,
-        'surname': profile.surname,
-        'patronymic': profile.patronymic,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('profile', {
+      'id': profile.id,
+      'username': profile.username,
+      'token': profile.token,
+      'name': profile.name,
+      'surname': profile.surname,
+      'patronymic': profile.patronymic,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
-
 }

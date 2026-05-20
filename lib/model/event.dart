@@ -8,6 +8,7 @@ class Event {
   final String startDate;
   final int? speakerId;
   Uint8List? photoBytes;
+  Uint8List? presentationBytes;
 
   Event({
     this.id,
@@ -16,7 +17,8 @@ class Event {
     this.location,
     required this.startDate,
     this.speakerId,
-    this.photoBytes
+    this.photoBytes,
+    this.presentationBytes
   });
 
   factory Event.fromMap(Map<String, dynamic> map) {
@@ -28,6 +30,7 @@ class Event {
       startDate: map['start_date'],
       speakerId: map['speaker_id'],
       photoBytes: map['photo'] as Uint8List?,
+      presentationBytes: map['presentation'] as Uint8List?,
     );
   }
 
