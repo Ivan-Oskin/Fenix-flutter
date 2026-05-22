@@ -1,83 +1,181 @@
-import 'package:fenix/view/event.dart';
 import 'package:flutter/material.dart';
+import 'package:fenix/model/event.dart';
+import 'package:fenix/view/event_view.dart';
+import 'package:fenix/view/information_page.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class SchedulePage {
-  late final eventWidget = EventWidget();
+class SchedulePage extends StatelessWidget {
+  const SchedulePage({super.key});
 
-  late final Container event = eventWidget.getEvent(
-    'assets/images/main_page/pafnuti.png',
-    "Встреча фан клуба Пафнутия Львовича Чубышева",
-    "12:00",
-    "12.07.2027",
-    true,
-  );
+  Future<List<Event>> fetchEvents() async {
+    try {
+      final storage = const FlutterSecureStorage();
+      final String? token = await storage.read(key: 'jwt_token');
 
-  final Widget welcomeText = Text(
-    "Мероприятия",
-    textAlign: TextAlign.center,
-    style: TextStyle(
-      fontSize: 36,
-      fontFamily: 'inter',
-      color: Color(0xFF484C52),
-      fontWeight: FontWeight.w600,
-    ),
-  );
+      final response = await http.get(
+        Uri.parse('http://llvvv.ru:8080/api/meetings'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
 
-  late final welcomeBlock = SafeArea(
-    child: Padding(
-      padding: EdgeInsets.only(top: 10),
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: SizedBox(width: 330, child: welcomeText),
-      ),
-    ),
-  );
+      print("📡 Статус списка: ${response.statusCode}");
 
-  late final findArea = SizedBox(
-    width: 351,
-    height: 85,
-    child: Row(
+      if (response.statusCode != 200) {
+        throw Exception('Ошибка сервера: ${response.statusCode}');
+      }
+
+      final List<dynamic> data = jsonDecode(response.body);
+      List<Event> events = [];
+
+      for (var json in data) {
+        Event event = Event.fromMap(json);
+        print("✅ Мероприятие ID=${event.id}, Title=${event.title}");
+
+        // Загрузка фото
+        try {
+          final photoUrl =
+              'http://llvvv.ru:8080/api/meetings/${event.id}/photo/';
+
+          final photoResponse = await http.get(
+            Uri.parse(photoUrl),
+            headers: {
+              'Authorization': 'Bearer $token',
+              // используем уже полученный token
+            },
+          );
+
+          print(
+            "📸 Фото ID=${event.id} → ${photoResponse.statusCode} | ${photoResponse.bodyBytes.length} байт",
+          );
+
+          if (photoResponse.statusCode == 200 &&
+              photoResponse.bodyBytes.isNotEmpty) {
+            event.photoBytes = photoResponse.bodyBytes;
+          }
+
+        } catch (e) {
+          print("❌ Ошибка фото ID=${event.id}: $e");
+        }
+
+        events.add(event);
+      }
+
+      return events;
+    } catch (e) {
+      print("🔥 Общая ошибка при загрузке мероприятий: $e");
+      rethrow;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
       children: [
-        Expanded(
-          child: TextField(
-            cursorColor: Color(0xFFC67C4E),
-            style: TextStyle(color: Color(0xBF484C52)),
-            decoration: InputDecoration(
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Color(0xBF484C52)),
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: SizedBox(
+                width: 330,
+                child: Text(
+                  "Мероприятия",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 36,
+                    fontFamily: 'inter',
+                    color: const Color(0xFF484C52),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
-              focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFFC67C4E)),
-              ),
-              hintText: 'Введите название',
-              hintStyle: TextStyle(color: Color(0xBF484C52)),
             ),
           ),
         ),
-        IconButton(
-          onPressed: () {},
-          icon: Image.asset(
-            "assets/images/main_page/loupe.png",
-            width: 41,
-            height: 41,
+
+        SizedBox(
+          width: 351,
+          height: 85,
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  cursorColor: const Color(0xFFC67C4E),
+                  style: const TextStyle(color: Color(0xBF484C52)),
+                  decoration: InputDecoration(
+                    enabledBorder: const UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xBF484C52)),
+                    ),
+                    focusedBorder: const UnderlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFC67C4E)),
+                    ),
+                    hintText: 'Введите название',
+                    hintStyle: const TextStyle(color: Color(0xBF484C52)),
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: () {},
+                icon: Image.asset(
+                  "assets/images/main_page/loupe.png",
+                  width: 41,
+                  height: 41,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        Expanded(
+          child: SizedBox(
+            width: 381,
+            child: FutureBuilder<List<Event>>(
+              future: fetchEvents(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(child: Text('Ошибка:\n${snapshot.error}'));
+                }
+
+                final events = snapshot.data ?? [];
+
+                if (events.isEmpty) {
+                  return const Center(child: Text('Мероприятия не найдены'));
+                }
+
+                return SingleChildScrollView(
+                  child: Column(
+                    spacing: 5,
+                    children: events.map((event) {
+                      final eventWidget = EventWidget();
+                      final container = eventWidget.getEvent(event, false);
+
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  InformationPage(event: event),
+                            ),
+                          );
+                        },
+                        child: container,
+                      );
+                    }).toList(),
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ],
-    ),
-  );
-
-  late final eventBlock = SizedBox(
-    width: 381,
-    height: 475,
-    child: SingleChildScrollView(
-      child: Column(spacing: 5, children: [event, event, event, event, event]),
-    ),
-  );
-
-  Column getPage() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [welcomeBlock, findArea, eventBlock],
     );
   }
 }

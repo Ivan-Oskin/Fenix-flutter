@@ -30,10 +30,18 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  mobile_scanner: ^5.2.3   # актуальная версия на 2026 год
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
+  mobile_scanner: ^5.2.3
+  easy_docs_viewer: ^0.0.2-unstable-release
+  file_picker: ^8.0.0
+  syncfusion_flutter_pdfviewer: ^33.2.7
+  sqflite: ^2.3.3
+  path_provider: ^2.1.5
+  path: ^1.9.0
+  flutter_secure_storage: ^9.2.2
+  http: ^1.2.2
+  url_launcher: ^6.3.0
+  intl: ^0.19.0
+  connectivity_plus: ^6.0.5
   cupertino_icons: ^1.0.8
 
 dev_dependencies:
@@ -64,6 +72,8 @@ flutter:
     - assets/images/bottom/main_button.png
     - assets/images/bottom/calendar_active.png
     - assets/images/bottom/main_button_active.png
+    - assets/images/presentation/send.png
+    - assets/images/reg/logo.png
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
