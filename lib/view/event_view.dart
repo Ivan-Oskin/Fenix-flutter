@@ -2,10 +2,7 @@ import 'package:fenix/model/event.dart';
 import 'package:flutter/material.dart';
 
 class EventWidget {
-  Container getEvent(
-      Event event,
-      bool borderShow,
-      ) {
+  Container getEvent(Event event, bool borderShow) {
     Border border = Border.all(color: Colors.white);
     if (borderShow) {
       border = Border.all(color: Color(0xFFD9D9D9));
@@ -20,10 +17,7 @@ class EventWidget {
         event.photoBytes!,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          return Image.asset(
-            "assets/images/reg/logo.png",
-            fit: BoxFit.cover,
-          );
+          return Image.asset("assets/images/reg/logo.png", fit: BoxFit.cover);
         },
       );
     } else {
@@ -66,7 +60,7 @@ class EventWidget {
                       SizedBox(
                         width: 205,
                         child: Text(
-                          event.title,
+                          event.title!,
                           style: const TextStyle(color: Color(0xBF484C52)),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -75,7 +69,7 @@ class EventWidget {
                       SizedBox(
                         width: 205,
                         child: Text(
-                          event.startDate,
+                          event.startDate!,
                           textAlign: TextAlign.left,
                           style: const TextStyle(color: Color(0xFF484C52)),
                         ),

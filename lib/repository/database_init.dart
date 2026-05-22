@@ -50,10 +50,16 @@ class DataBaseInit {
     // Таблица Polls
     await db.execute('''
     CREATE TABLE IF NOT EXISTS polls (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id INTEGER PRIMARY KEY,
       meeting_id TEXT,
       title TEXT,
       url TEXT
+    );
+  ''');
+
+    await db.execute('''
+    CREATE TABLE IF NOT EXISTS wait_list (
+      id TEXT PRIMARY KEY
     );
   ''');
   }

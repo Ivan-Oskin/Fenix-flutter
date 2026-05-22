@@ -37,20 +37,26 @@ class SchedulePage extends StatelessWidget {
 
         // Загрузка фото
         try {
-          final photoUrl = 'http://llvvv.ru:8080/api/meetings/${event.id}/photo/';
+          final photoUrl =
+              'http://llvvv.ru:8080/api/meetings/${event.id}/photo/';
 
           final photoResponse = await http.get(
             Uri.parse(photoUrl),
             headers: {
-              'Authorization': 'Bearer $token',   // используем уже полученный token
+              'Authorization': 'Bearer $token',
+              // используем уже полученный token
             },
           );
 
-          print("📸 Фото ID=${event.id} → ${photoResponse.statusCode} | ${photoResponse.bodyBytes.length} байт");
+          print(
+            "📸 Фото ID=${event.id} → ${photoResponse.statusCode} | ${photoResponse.bodyBytes.length} байт",
+          );
 
-          if (photoResponse.statusCode == 200 && photoResponse.bodyBytes.isNotEmpty) {
+          if (photoResponse.statusCode == 200 &&
+              photoResponse.bodyBytes.isNotEmpty) {
             event.photoBytes = photoResponse.bodyBytes;
           }
+
         } catch (e) {
           print("❌ Ошибка фото ID=${event.id}: $e");
         }
@@ -114,7 +120,11 @@ class SchedulePage extends StatelessWidget {
               ),
               IconButton(
                 onPressed: () {},
-                icon: Image.asset("assets/images/main_page/loupe.png", width: 41, height: 41),
+                icon: Image.asset(
+                  "assets/images/main_page/loupe.png",
+                  width: 41,
+                  height: 41,
+                ),
               ),
             ],
           ),
@@ -151,7 +161,8 @@ class SchedulePage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => InformationPage(event: event),
+                              builder: (context) =>
+                                  InformationPage(event: event),
                             ),
                           );
                         },

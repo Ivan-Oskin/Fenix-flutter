@@ -15,7 +15,10 @@ class EventRepository {
 
     // Сохраняем файлы и получаем пути
     final photoPath = await _storage.savePhoto(event.id!, event.photoBytes);
-    final presentationPath = await _storage.savePresentation(event.id!, event.presentationBytes);
+    final presentationPath = await _storage.savePresentation(
+      event.id!,
+      event.presentationBytes,
+    );
 
     // Сохраняем только пути в БД
     await db.insert('event', {
@@ -25,7 +28,7 @@ class EventRepository {
       'location': event.location,
       'start_date': event.startDate,
       'speaker_id': event.speakerId,
-      'photo_path': photoPath,      // Путь к файлу фото
+      'photo_path': photoPath, // Путь к файлу фото
       'presentation_path': presentationPath, // Путь к файлу презентации
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
@@ -45,7 +48,9 @@ class EventRepository {
 
       // Загружаем файлы по путям
       event.photoBytes = await _storage.loadPhoto(map['photo_path']);
-      event.presentationBytes = await _storage.loadPresentation(map['presentation_path']);
+      event.presentationBytes = await _storage.loadPresentation(
+        map['presentation_path'],
+      );
 
       events.add(event);
     }
@@ -68,7 +73,9 @@ class EventRepository {
 
       // Загружаем файлы по путям
       event.photoBytes = await _storage.loadPhoto(maps.first['photo_path']);
-      event.presentationBytes = await _storage.loadPresentation(maps.first['presentation_path']);
+      event.presentationBytes = await _storage.loadPresentation(
+        maps.first['presentation_path'],
+      );
 
       return event;
     }

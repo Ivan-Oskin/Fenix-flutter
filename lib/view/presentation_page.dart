@@ -8,11 +8,7 @@ class PresentationPage extends StatefulWidget {
   final Event? event;
   final List<Poll>? polls;
 
-  const PresentationPage({
-    super.key,
-    this.event,
-    this.polls,
-  });
+  const PresentationPage({super.key, this.event, this.polls});
 
   @override
   State<PresentationPage> createState() => _PresentationPageState();
@@ -28,17 +24,15 @@ class _PresentationPageState extends State<PresentationPage> {
       height: 238,
       child: widget.event?.presentationBytes != null
           ? ClipRect(
-        child: SfPdfViewer.memory(
-          widget.event!.presentationBytes!,
-          canShowScrollHead: false,
-          canShowScrollStatus: false,
-          pageSpacing: 0,
-          enableDoubleTapZooming: false,
-        ),
-      )
-          : const Center(
-        child: Text('Презентация не загружена'),
-      ),
+              child: SfPdfViewer.memory(
+                widget.event!.presentationBytes!,
+                canShowScrollHead: false,
+                canShowScrollStatus: false,
+                pageSpacing: 0,
+                enableDoubleTapZooming: false,
+              ),
+            )
+          : const Center(child: Text('Презентация не загружена')),
     ),
   );
 
@@ -97,7 +91,10 @@ class _PresentationPageState extends State<PresentationPage> {
                     if (url != null && url.isNotEmpty) {
                       final uri = Uri.parse(url);
                       if (await canLaunchUrl(uri)) {
-                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        await launchUrl(
+                          uri,
+                          mode: LaunchMode.externalApplication,
+                        );
                       }
                     }
                   },
@@ -169,12 +166,13 @@ class _PresentationPageState extends State<PresentationPage> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SafeArea(                    // ← Добавил
+      body: SafeArea(
+        // ← Добавил
         child: Column(
           children: [
-            const SizedBox(height: 16),   // ← Уменьшил с 20
+            const SizedBox(height: 16), // ← Уменьшил с 20
             presentation,
-            SizedBox(height: 10,),
+            SizedBox(height: 10),
             // Кнопки переключения
             SizedBox(
               width: 300,
@@ -185,40 +183,57 @@ class _PresentationPageState extends State<PresentationPage> {
                   GestureDetector(
                     onTap: () => setState(() => showChat = true),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
-                        color: showChat ? const Color(0xFFC67C4E) : const Color(0xFFD9D9D9),
+                        color: showChat
+                            ? const Color(0xFFC67C4E)
+                            : const Color(0xFFD9D9D9),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Text(
                         "Вопрос докладчику",
-                        style: TextStyle(fontSize: 16, color: Color(0xFF484C52)),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Color(0xFF484C52),
+                        ),
                       ),
                     ),
                   ),
                   GestureDetector(
                     onTap: () => setState(() => showChat = false),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
-                        color: !showChat ? const Color(0xFFC67C4E) : const Color(0xFFD9D9D9),
+                        color: !showChat
+                            ? const Color(0xFFC67C4E)
+                            : const Color(0xFFD9D9D9),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Text(
                         "материалы",
-                        style: TextStyle(fontSize: 16, color: Color(0xFF484C52)),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Color(0xFF484C52),
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 10),   // ← Добавил небольшой отступ
+            const SizedBox(height: 10), // ← Добавил небольшой отступ
             // Основной контент
             Container(
               width: 381,
               height: 380,
-              margin: const EdgeInsets.only(top: 8),  // ← уменьшил margin
+              margin: const EdgeInsets.only(top: 8),
+              // ← уменьшил margin
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 color: const Color(0xFFD9D9D9),
@@ -227,7 +242,7 @@ class _PresentationPageState extends State<PresentationPage> {
               child: showChat ? chat : materials,
             ),
 
-            const SizedBox(height: 16),   // ← уменьшил
+            const SizedBox(height: 16), // ← уменьшил
           ],
         ),
       ),

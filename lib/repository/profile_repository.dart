@@ -17,6 +17,7 @@ class ProfileRepository {
 
   Future<void> save(Profile profile) async {
     final db = await DataBaseInit.instance.database;
+    await db.delete('profile');
     await db.insert('profile', {
       'id': profile.id,
       'username': profile.username,
@@ -25,5 +26,19 @@ class ProfileRepository {
       'surname': profile.surname,
       'patronymic': profile.patronymic,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<Profile?> get() async {
+    final db = await DataBaseInit.instance.database;
+
+    final List<Map<String, dynamic>> maps = await db.query("profile");
+
+    if (maps.isNotEmpty) {
+      final profile = Profile.fromMap(maps.first);
+
+      return profile;
+    }
+
+    return null;
   }
 }

@@ -2,20 +2,20 @@ import 'dart:typed_data';
 
 class Event {
   final String? id;
-  final String title;
+  final String? title;
   final String? description;
   final String? location;
-  final String startDate;
+  final String? startDate;
   final int? speakerId;
   Uint8List? photoBytes;
   Uint8List? presentationBytes;
 
   Event({
     this.id,
-    required this.title,
+    this.title,
     this.description,
     this.location,
-    required this.startDate,
+    this.startDate,
     this.speakerId,
     this.photoBytes,
     this.presentationBytes

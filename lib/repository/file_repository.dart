@@ -5,7 +5,9 @@ import 'package:path/path.dart' as path;
 
 class FileStorageService {
   static final FileStorageService _instance = FileStorageService._internal();
+
   factory FileStorageService() => _instance;
+
   FileStorageService._internal();
 
   // Базовые директории
@@ -17,7 +19,9 @@ class FileStorageService {
   Future<void> init() async {
     _appDirectory = await getApplicationDocumentsDirectory();
     _photosDirectory = Directory(path.join(_appDirectory.path, 'photos'));
-    _presentationsDirectory = Directory(path.join(_appDirectory.path, 'presentations'));
+    _presentationsDirectory = Directory(
+      path.join(_appDirectory.path, 'presentations'),
+    );
 
     // Создаем директории, если их нет
     if (!await _photosDirectory.exists()) {
@@ -81,12 +85,16 @@ class FileStorageService {
   // Удаление файлов мероприятия
   Future<void> deleteEventFiles(String eventId) async {
     try {
-      final photoFile = File(path.join(_photosDirectory.path, '${eventId}_photo.jpg'));
+      final photoFile = File(
+        path.join(_photosDirectory.path, '${eventId}_photo.jpg'),
+      );
       if (await photoFile.exists()) {
         await photoFile.delete();
       }
 
-      final presentationFile = File(path.join(_presentationsDirectory.path, '${eventId}_presentation.pptx'));
+      final presentationFile = File(
+        path.join(_presentationsDirectory.path, '${eventId}_presentation.pptx'),
+      );
       if (await presentationFile.exists()) {
         await presentationFile.delete();
       }

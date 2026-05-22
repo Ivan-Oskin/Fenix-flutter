@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fenix/model/profile.dart';
 import 'package:fenix/repository/profile_repository.dart';
 import 'package:fenix/main.dart';
+import 'package:fenix/view/reg_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -40,7 +41,8 @@ class _AuthScreenState extends State<AuthScreen> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final String token = data['token']; // подкорректируй ключ, если отличается
+        final String token =
+            data['token']; // подкорректируй ключ, если отличается
 
         // Получаем профиль
         final profileResponse = await http.get(
@@ -52,7 +54,9 @@ class _AuthScreenState extends State<AuthScreen> {
         );
 
         if (profileResponse.statusCode == 200) {
-          final Map<String, dynamic> profileJson = jsonDecode(profileResponse.body);
+          final Map<String, dynamic> profileJson = jsonDecode(
+            profileResponse.body,
+          );
 
           // ← Вот здесь исправление
           final profile = Profile.fromMap(profileJson);
@@ -160,9 +164,9 @@ class _AuthScreenState extends State<AuthScreen> {
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
-                    'Войти',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
+                          'Войти',
+                          style: TextStyle(fontSize: 16, color: Colors.white),
+                        ),
                 ),
               ),
 
@@ -170,14 +174,16 @@ class _AuthScreenState extends State<AuthScreen> {
 
               TextButton(
                 onPressed: () {
-                  // Переход на регистрацию
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const RegistrationScreen(),
+                    ),
+                  );
                 },
                 child: const Text(
                   'регистрация',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.black87,
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.black87),
                 ),
               ),
             ],
