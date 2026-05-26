@@ -1,5 +1,4 @@
 import 'package:fenix/model/event.dart';
-import 'package:fenix/repository/event_repository.dart';
 import 'package:fenix/view/information_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -40,9 +39,9 @@ class _FindByIdPageState extends State<FindByIdPage> {
     final idText = _idController.text.trim();
 
     if (idText.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Введите ID мероприятия")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Введите ID мероприятия")));
       return;
     }
 
@@ -56,7 +55,6 @@ class _FindByIdPageState extends State<FindByIdPage> {
         throw Exception("Токен не найден");
       }
 
-      // 1. Получаем мероприятие по ID
       final response = await http.get(
         Uri.parse('http://llvvv.ru:8080/api/meetings/$idText'),
         headers: {
@@ -72,32 +70,26 @@ class _FindByIdPageState extends State<FindByIdPage> {
       final Map<String, dynamic> data = json.decode(response.body);
       Event event = Event.fromMap(data);
 
-      // 2. Загружаем фото
       try {
         final photoResponse = await http.get(
           Uri.parse('http://llvvv.ru:8080/api/meetings/${event.id}/photo/'),
           headers: {'Authorization': 'Bearer $token'},
         );
 
-        if (photoResponse.statusCode == 200 && photoResponse.bodyBytes.isNotEmpty) {
+        if (photoResponse.statusCode == 200 &&
+            photoResponse.bodyBytes.isNotEmpty) {
           event.photoBytes = photoResponse.bodyBytes;
         }
       } catch (e) {
         print("Ошибка загрузки фото: $e");
       }
 
-      // 3. Переходим на страницу информации
       if (mounted) {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => InformationPage(
-              event: event,
-              onDataChanged: () {
-                // Можно обновить главную страницу, если нужно
-                // (если у тебя есть доступ к mainPageKey)
-              },
-            ),
+            builder: (context) =>
+                InformationPage(event: event, onDataChanged: () {}),
           ),
         );
       }
@@ -133,7 +125,6 @@ class _FindByIdPageState extends State<FindByIdPage> {
           ),
         ),
 
-        // Поле поиска
         SizedBox(
           width: 351,
           height: 85,
@@ -161,15 +152,15 @@ class _FindByIdPageState extends State<FindByIdPage> {
                 onPressed: _isLoading ? null : _searchById,
                 icon: _isLoading
                     ? const SizedBox(
-                  width: 41,
-                  height: 41,
-                  child: CircularProgressIndicator(strokeWidth: 3),
-                )
+                        width: 41,
+                        height: 41,
+                        child: CircularProgressIndicator(strokeWidth: 3),
+                      )
                     : Image.asset(
-                  "assets/images/main_page/loupe.png",
-                  width: 41,
-                  height: 41,
-                ),
+                        "assets/images/main_page/loupe.png",
+                        width: 41,
+                        height: 41,
+                      ),
               ),
             ],
           ),

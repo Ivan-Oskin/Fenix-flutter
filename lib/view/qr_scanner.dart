@@ -10,7 +10,7 @@ Event? parseEventFromQr(String rawText) {
     final lines = rawText.split('\n');
 
     String title = 'Без названия';
-    DateTime? date;
+    String date = '';
     String location = '';
     String id = '';
 
@@ -25,53 +25,28 @@ Event? parseEventFromQr(String rawText) {
       print("🔑 Ключ: '$key' | Значение: '$value'"); // для отладки
 
       switch (key) {
-        case 'название':
         case 'title':
           title = value;
           break;
-
-        case 'дата':
         case 'date':
-          // Пробуем разные возможные форматы даты
-          try {
-            date = DateFormat('dd.MM.yyyy HH:mm').parse(value);
-          } catch (_) {
-            try {
-              date = DateFormat('dd.MM.yyyy H:mm').parse(value);
-            } catch (_) {}
-          }
+          date = value;
           break;
-
-        case 'локация':
         case 'location':
-        case 'место':
           location = value;
           break;
-
         case 'id':
-        case 'ид':
           id = value;
           break;
       }
     }
 
-    print(
-      "📊 Итог парсинга → title: '$title', date: $date, location: '$location', id: '$id'",
-    );
-
-    if (date == null) {
-      print("❌ Не удалось распарсить дату");
-      return null;
-    }
-
-    final String dateString = DateFormat('dd.MM.yyyy HH:mm').format(date);
-    print("✅ УСПЕШНО: $title | $dateString | $location | $id");
+    print("✅ УСПЕШНО: $title | $date | $location | $id");
 
     return Event(
       title: title,
       location: location,
       id: id,
-      startDate: dateString,
+      startDate: date,
     );
   } catch (e) {
     print('❌ Ошибка парсинга: $e');

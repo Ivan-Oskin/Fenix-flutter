@@ -26,7 +26,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
       final response = await http
           .get(
-        Uri.parse('http://llvvv.ru:8080/api/meetings'),
+        Uri.parse('http://llvvv.ru:8080/api/meetings/active'),
         headers: {
           'Content-Type': 'application/json',
           if (token != null) 'Authorization': 'Bearer $token',

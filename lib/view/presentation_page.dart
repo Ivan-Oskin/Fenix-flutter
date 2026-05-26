@@ -1,11 +1,11 @@
 import 'package:fenix/model/event.dart';
 import 'package:fenix/model/polls.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
+import 'package:flutter/services.dart';
 
 class PresentationPage extends StatefulWidget {
   final Event? event;
@@ -82,14 +82,14 @@ class _PresentationPageState extends State<PresentationPage> {
                 child: ListTile(
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 8,
+                    vertical: 12,
                   ),
                   title: Text(
                     poll.title ?? "Без названия",
                     style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
                   subtitle: Text(
-                    poll.url ?? "",
+                    poll.url ?? "Ссылка отсутствует",
                     style: const TextStyle(
                       color: Colors.blue,
                       decoration: TextDecoration.underline,
@@ -97,16 +97,8 @@ class _PresentationPageState extends State<PresentationPage> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  trailing: const Icon(Icons.open_in_new, color: Colors.blue),
-                  onTap: () async {
-                    final url = poll.url;
-                    if (url != null && url.isNotEmpty) {
-                      final uri = Uri.parse(url);
-                      if (await canLaunchUrl(uri)) {
-                        await launchUrl(uri, mode: LaunchMode.externalApplication);
-                      }
-                    }
-                  },
+                  trailing: const Icon(Icons.copy, color: Colors.blue), // изменили иконку
+                  onTap: () => _copyPollUrl(poll.url),
                 ),
               );
             }).toList(),
@@ -353,6 +345,37 @@ class _PresentationPageState extends State<PresentationPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _copyPollUrl(String? url) async {
+    if (url == null || url.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Ссылка отсутствует"),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    try {
+      await Clipboard.setData(ClipboardData(text: url.trim()));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("✅ Ссылка скопирована в буфер обмена"),
+          backgroundColor: Color(0xFF4CAF50),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Не удалось скопировать ссылку"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
