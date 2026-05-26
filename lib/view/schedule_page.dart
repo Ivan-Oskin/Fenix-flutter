@@ -5,27 +5,37 @@ import 'package:fenix/view/information_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
+import 'dart:async';
 
-class SchedulePage extends StatelessWidget {
+class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
+
+  @override
+  State<SchedulePage> createState() => _SchedulePageState();
+}
+
+class _SchedulePageState extends State<SchedulePage> {
+  // Ключ для принудительного обновления FutureBuilder
+  Key _futureKey = UniqueKey();
 
   Future<List<Event>> fetchEvents() async {
     try {
       final storage = const FlutterSecureStorage();
       final String? token = await storage.read(key: 'jwt_token');
 
-      final response = await http.get(
+      final response = await http
+          .get(
         Uri.parse('http://llvvv.ru:8080/api/meetings'),
         headers: {
           'Content-Type': 'application/json',
           if (token != null) 'Authorization': 'Bearer $token',
         },
-      );
-
-      print("📡 Статус списка: ${response.statusCode}");
+      )
+          .timeout(const Duration(seconds: 12));
 
       if (response.statusCode != 200) {
-        throw Exception('Ошибка сервера: ${response.statusCode}');
+        throw Exception('Server error: ${response.statusCode}');
       }
 
       final List<dynamic> data = jsonDecode(response.body);
@@ -33,42 +43,41 @@ class SchedulePage extends StatelessWidget {
 
       for (var json in data) {
         Event event = Event.fromMap(json);
-        print("✅ Мероприятие ID=${event.id}, Title=${event.title}");
 
-        // Загрузка фото
         try {
           final photoUrl =
               'http://llvvv.ru:8080/api/meetings/${event.id}/photo/';
-
           final photoResponse = await http.get(
             Uri.parse(photoUrl),
-            headers: {
-              'Authorization': 'Bearer $token',
-              // используем уже полученный token
-            },
-          );
-
-          print(
-            "📸 Фото ID=${event.id} → ${photoResponse.statusCode} | ${photoResponse.bodyBytes.length} байт",
+            headers: {'Authorization': 'Bearer $token'},
           );
 
           if (photoResponse.statusCode == 200 &&
               photoResponse.bodyBytes.isNotEmpty) {
             event.photoBytes = photoResponse.bodyBytes;
           }
-
-        } catch (e) {
-          print("❌ Ошибка фото ID=${event.id}: $e");
+        } catch (_) {
+          // Игнорируем ошибки загрузки фото
         }
 
         events.add(event);
       }
 
       return events;
+    } on SocketException {
+      throw Exception('NO_INTERNET');
+    } on TimeoutException {
+      throw Exception('NO_INTERNET');
     } catch (e) {
-      print("🔥 Общая ошибка при загрузке мероприятий: $e");
+      print("🔥 Другая ошибка: $e");
       rethrow;
     }
+  }
+
+  void _refresh() {
+    setState(() {
+      _futureKey = UniqueKey(); // Принудительно обновляем FutureBuilder
+    });
   }
 
   @override
@@ -134,13 +143,57 @@ class SchedulePage extends StatelessWidget {
           child: SizedBox(
             width: 381,
             child: FutureBuilder<List<Event>>(
+              key: _futureKey,                    // ← Важно!
               future: fetchEvents(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
+
                 if (snapshot.hasError) {
-                  return Center(child: Text('Ошибка:\n${snapshot.error}'));
+                  final errorMsg = snapshot.error.toString();
+
+                  if (errorMsg.contains('NO_INTERNET')) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.wifi_off,
+                            size: 70,
+                            color: Colors.orange,
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            "Проблемы с интернетом",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF484C52),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            "Проверьте подключение\nи попробуйте снова",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                          const SizedBox(height: 24),
+                          ElevatedButton.icon(
+                            onPressed: _refresh,
+                            icon: const Icon(Icons.refresh),
+                            label: const Text("Повторить"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFC67C4E),
+                              foregroundColor: Colors.white,           // ← Это меняет цвет текста и иконки
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return const SizedBox.shrink();
                 }
 
                 final events = snapshot.data ?? [];
@@ -161,8 +214,7 @@ class SchedulePage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  InformationPage(event: event),
+                              builder: (context) => InformationPage(event: event),
                             ),
                           );
                         },
