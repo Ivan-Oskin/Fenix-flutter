@@ -134,12 +134,6 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Профиль"),
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF484C52),
-        elevation: 0,
-      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SafeArea(

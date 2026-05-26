@@ -29,9 +29,74 @@
   class MainPageState extends State<MainPage> {
     late final eventWidget = EventWidget();
     late final eventRepository = EventRepository();
+    late final pollRepository = PollRepository();
 
     void refresh() {
       setState(() {});
+    }
+
+    void _onLongPress(Event event) {
+      if (event.id == null) return;
+
+      showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (context) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: Text(
+                  "Действия с событием",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete_forever, color: Colors.red),
+                title: const Text(
+                  "Удалить событие",
+                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
+                ),
+                onTap: () async {
+                  Navigator.pop(context); // закрываем BottomSheet
+
+                  try {
+                    await eventRepository.delete(event.id!);
+                    await pollRepository.delete(event.id!);
+                    if (!mounted) return;
+
+                    refresh();
+
+                    widget.onDataUpdated?.call();
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Событие успешно удалено"),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Ошибка удаления: $e"),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.cancel),
+                title: const Text("Отмена"),
+                onTap: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
     void _onConnectPressed(Event event) async {
@@ -69,8 +134,10 @@
 
     // Виджет одного события
     Widget buildEventCard(Event event) {
-      return GestureDetector(
+      return InkWell(                    // Лучше GestureDetector
         onTap: () => _onConnectPressed(event),
+        onLongPress: () => _onLongPress(event),
+        borderRadius: BorderRadius.circular(16), // подбери под свой дизайн
         child: eventWidget.getEvent(event, false),
       );
     }

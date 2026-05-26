@@ -41,4 +41,9 @@ class ProfileRepository {
 
     return null;
   }
+
+  Future<void> delete() async {
+    final db = await DataBaseInit.instance.database;
+    await db.delete('profile');
+  }
 }

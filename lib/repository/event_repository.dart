@@ -94,4 +94,9 @@ class EventRepository {
     );
     return result.isNotEmpty;
   }
+
+  Future<void> delete(String id) async {
+    final db = await _dbHelper.database;
+    db.delete("event", where: "id = ?", whereArgs: [id]);
+  }
 }

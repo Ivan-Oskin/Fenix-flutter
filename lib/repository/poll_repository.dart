@@ -29,4 +29,9 @@ class PollRepository {
 
     return map.map((map) => Poll.fromMap(map)).toList();
   }
+
+  Future<void> delete(String meetingId) async {
+    final db = await _dbHelper.database;
+    db.delete("polls", where: "meeting_id = ?", whereArgs: [meetingId]);
+  }
 }
