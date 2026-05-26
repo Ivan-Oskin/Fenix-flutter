@@ -125,7 +125,7 @@ class MainWidgetState extends State<MainWidget> {
       ProfilePage(),
       FindByIdPage(
         onBackToMenu: () => setState(() => selectedPage = 1),
-      ).getPage(),
+      ),
       PresentationPage(),
     ];
 
