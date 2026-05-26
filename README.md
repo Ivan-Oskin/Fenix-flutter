@@ -1,17 +1,23 @@
-# fenix
+## Fenix мбоильное приложение
 
-A new Flutter project.
+# приложение написано на Flutter 3.41.5
 
-## Getting Started
+- Установи Android Studio с плагинами Flutter и Dart (Файл -> Настройки -> Плагины)
 
-This project is a starting point for a Flutter application.
+- Установи Flutter SDK и добавь его в PATH
 
-A few resources to get you started if this is your first Flutter project:
+- В терминале выполни: flutter doctor и flutter doctor --android-licenses
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- Склонируй проект с GitHub: git clone ссылка_на_репозиторий
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Открой склонированную папку в Android Studio
+
+- добавь плагин flutter в Android Studio
+
+- В терминале внутри Android Studio выполни: flutter pub get
+
+- Запусти эмулятор Android или подключи телефон с отладкой по USB
+
+- Выполни: flutter run
+
+## Готово. Приложение запустится на устройстве.
